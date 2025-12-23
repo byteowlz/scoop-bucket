@@ -1,0 +1,66 @@
+name: Update Manifest
+
+on:
+  repository_dispatch:
+    types: [update-manifest]
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Update manifest
+        env:
+          NAME: ${{ github.event.client_payload.name }}
+          VERSION: ${{ github.event.client_payload.version }}
+          REPO: ${{ github.event.client_payload.repo }}
+        run: |
+          set -e
+          VERSION_CLEAN="${VERSION#v}"
+          
+          # Download checksums
+          curl -sL "https://github.com/${REPO}/releases/download/${VERSION}/checksums.txt" -o checksums.txt
+          
+          # Get SHA256 for Windows
+          SHA256_WIN=$(grep "x86_64-pc-windows-msvc.zip" checksums.txt | cut -d' ' -f1)
+          
+          # Get description from repo
+          DESCRIPTION=$(curl -s "https://api.github.com/repos/${REPO}" | jq -r '.description // "A Byteowlz tool"')
+          
+          cat > "bucket/${NAME}.json" << EOF
+          {
+              "version": "${VERSION_CLEAN}",
+              "description": "${DESCRIPTION}",
+              "homepage": "https://github.com/${REPO}",
+              "license": "MIT",
+              "architecture": {
+                  "64bit": {
+                      "url": "https://github.com/${REPO}/releases/download/${VERSION}/${NAME}-${VERSION}-x86_64-pc-windows-msvc.zip",
+                      "hash": "${SHA256_WIN}"
+                  }
+              },
+              "bin": [
+                  "${NAME}.exe"
+              ],
+              "checkver": "github",
+              "autoupdate": {
+                  "architecture": {
+                      "64bit": {
+                          "url": "https://github.com/${REPO}/releases/download/v\$version/${NAME}-v\$version-x86_64-pc-windows-msvc.zip"
+                      }
+                  }
+              }
+          }
+          EOF
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add bucket/
+          git diff --staged --quiet || git commit -m "Update ${{ github.event.client_payload.name }} to ${{ github.event.client_payload.version }}"
+          git push
