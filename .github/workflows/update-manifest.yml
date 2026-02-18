@@ -15,23 +15,25 @@ jobs:
 
       - name: Update manifest
         env:
-          NAME: ${{ github.event.client_payload.name }}
+          MANIFEST: ${{ github.event.client_payload.manifest }}
           VERSION: ${{ github.event.client_payload.version }}
           REPO: ${{ github.event.client_payload.repo }}
         run: |
           set -e
           VERSION_CLEAN="${VERSION#v}"
-          
+
           # Download checksums
           curl -sL "https://github.com/${REPO}/releases/download/${VERSION}/checksums.txt" -o checksums.txt
-          
-          # Get SHA256 for Windows
-          SHA256_WIN=$(grep "x86_64-pc-windows-msvc.zip" checksums.txt | cut -d' ' -f1)
-          
+
+          # Get SHA256 for Windows (both x86_64 and arm64 if available)
+          SHA256_WIN_X64=$(grep "x86_64-pc-windows-msvc.zip" checksums.txt | cut -d' ' -f1)
+          SHA256_WIN_ARM64=$(grep "aarch64-pc-windows-msvc.zip" checksums.txt | cut -d' ' -f1)
+
           # Get description from repo
           DESCRIPTION=$(curl -s "https://api.github.com/repos/${REPO}" | jq -r '.description // "A Byteowlz tool"')
-          
-          cat > "bucket/${NAME}.json" << EOF
+
+          # Start manifest
+          cat > "bucket/${MANIFEST}.json" << EOF
           {
               "version": "${VERSION_CLEAN}",
               "description": "${DESCRIPTION}",
@@ -39,18 +41,25 @@ jobs:
               "license": "MIT",
               "architecture": {
                   "64bit": {
-                      "url": "https://github.com/${REPO}/releases/download/${VERSION}/${NAME}-${VERSION}-x86_64-pc-windows-msvc.zip",
-                      "hash": "${SHA256_WIN}"
+                      "url": "https://github.com/${REPO}/releases/download/${VERSION}/${MANIFEST}-v${VERSION_CLEAN}-x86_64-pc-windows-msvc.zip",
+                      "hash": "${SHA256_WIN_X64}"
+                  },
+                  "arm64": {
+                      "url": "https://github.com/${REPO}/releases/download/${VERSION}/${MANIFEST}-v${VERSION_CLEAN}-aarch64-pc-windows-msvc.zip",
+                      "hash": "${SHA256_WIN_ARM64}"
                   }
               },
               "bin": [
-                  "${NAME}.exe"
+                  "${MANIFEST}.exe"
               ],
               "checkver": "github",
               "autoupdate": {
                   "architecture": {
                       "64bit": {
-                          "url": "https://github.com/${REPO}/releases/download/v\$version/${NAME}-v\$version-x86_64-pc-windows-msvc.zip"
+                          "url": "https://github.com/${REPO}/releases/download/v\$version/${MANIFEST}-v\$version-x86_64-pc-windows-msvc.zip"
+                      },
+                      "arm64": {
+                          "url": "https://github.com/${REPO}/releases/download/v\$version/${MANIFEST}-v\$version-aarch64-pc-windows-msvc.zip"
                       }
                   }
               }
@@ -62,5 +71,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add bucket/
-          git diff --staged --quiet || git commit -m "Update ${{ github.event.client_payload.name }} to ${{ github.event.client_payload.version }}"
+          git diff --staged --quiet || git commit -m "Update ${{ github.event.client_payload.manifest }} to ${{ github.event.client_payload.version }}"
           git push
