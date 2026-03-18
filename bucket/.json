@@ -1,0 +1,30 @@
+{
+    "version": "2.3.0",
+    "description": "use searxng from the command line",
+    "homepage": "https://github.com/byteowlz/sx",
+    "license": "MIT",
+    "architecture": {
+        "64bit": {
+            "url": "https://github.com/byteowlz/sx/releases/download/v2.3.0/-v2.3.0-x86_64-pc-windows-msvc.zip",
+            "hash": ""
+        },
+        "arm64": {
+            "url": "https://github.com/byteowlz/sx/releases/download/v2.3.0/-v2.3.0-aarch64-pc-windows-msvc.zip",
+            "hash": ""
+        }
+    },
+    "bin": [
+        ".exe"
+    ],
+    "checkver": "github",
+    "autoupdate": {
+        "architecture": {
+            "64bit": {
+                "url": "https://github.com/byteowlz/sx/releases/download/v$version/-v$version-x86_64-pc-windows-msvc.zip"
+            },
+            "arm64": {
+                "url": "https://github.com/byteowlz/sx/releases/download/v$version/-v$version-aarch64-pc-windows-msvc.zip"
+            }
+        }
+    }
+}
