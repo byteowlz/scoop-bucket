@@ -1,15 +1,15 @@
 {
-    "version": "2.4.0",
-    "description": "use searxng from the command line",
-    "homepage": "https://github.com/byteowlz/sx",
+    "version": "0.2.5",
+    "description": "making MS teams barely bearable",
+    "homepage": "https://github.com/byteowlz/tmz",
     "license": "MIT",
     "architecture": {
         "64bit": {
-            "url": "https://github.com/byteowlz/sx/releases/download/v2.4.0/-v2.4.0-x86_64-pc-windows-msvc.zip",
-            "hash": ""
+            "url": "https://github.com/byteowlz/tmz/releases/download/v0.2.5/-v0.2.5-x86_64-pc-windows-msvc.zip",
+            "hash": "9f596315745df956649ca06a143fdd150a9471818f2e319dc203820c6c8051ee"
         },
         "arm64": {
-            "url": "https://github.com/byteowlz/sx/releases/download/v2.4.0/-v2.4.0-aarch64-pc-windows-msvc.zip",
+            "url": "https://github.com/byteowlz/tmz/releases/download/v0.2.5/-v0.2.5-aarch64-pc-windows-msvc.zip",
             "hash": ""
         }
     },
@@ -20,10 +20,10 @@
     "autoupdate": {
         "architecture": {
             "64bit": {
-                "url": "https://github.com/byteowlz/sx/releases/download/v$version/-v$version-x86_64-pc-windows-msvc.zip"
+                "url": "https://github.com/byteowlz/tmz/releases/download/v$version/-v$version-x86_64-pc-windows-msvc.zip"
             },
             "arm64": {
-                "url": "https://github.com/byteowlz/sx/releases/download/v$version/-v$version-aarch64-pc-windows-msvc.zip"
+                "url": "https://github.com/byteowlz/tmz/releases/download/v$version/-v$version-aarch64-pc-windows-msvc.zip"
             }
         }
     }
